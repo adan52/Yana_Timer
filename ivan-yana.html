@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ivan & Yana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:    #f7c5d0;
+      --blush:   #fde8ed;
+      --rose:    #e8a0b0;
+      --deep:    #c4637a;
+      --white:   #fffafb;
+      --text:    #3d2030;
+      --muted:   #b07080;
+      --radius:  20px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--white);
+      color: var(--text);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
+    }
+
+    /* ── Background blob ── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 500px; height: 500px; background: var(--pink); top: -100px; right: -100px; }
+    .blob-2 { width: 400px; height: 400px; background: var(--blush); bottom: -80px; left: -80px; }
+
+    /* ── Page wrapper ── */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 48px 24px;
+      gap: 48px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      animation: fadeUp .9s ease both;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .names {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(52px, 10vw, 96px);
+      font-weight: 300;
+      line-height: 1;
+      color: var(--text);
+      display: flex; align-items: center; gap: 18px;
+    }
+
+    .names .amp {
+      font-style: italic;
+      color: var(--deep);
+      font-size: .65em;
+    }
+
+    .since {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-top: 20px;
+      font-size: 13px;
+      letter-spacing: .12em;
+      color: var(--muted);
+    }
+
+    /* ── SVG icon helper ── */
+    .icon { display: inline-block; flex-shrink: 0; }
+
+    /* ── Divider ── */
+    .divider {
+      width: 100%;
+      max-width: 520px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--pink), transparent);
+      animation: fadeUp .9s .15s ease both;
+    }
+
+    /* ── Timer grid ── */
+    .timer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 680px;
+      animation: fadeUp .9s .25s ease both;
+    }
+
+    .unit-card {
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(247,197,208,.6);
+      border-radius: var(--radius);
+      padding: 28px 16px 22px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .unit-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(196,99,122,.12);
+    }
+
+    .unit-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--rose), var(--deep));
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .unit-card:hover::after { opacity: 1; }
+
+    .unit-icon {
+      margin-bottom: 12px;
+      color: var(--rose);
+    }
+
+    .unit-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(38px, 7vw, 64px);
+      font-weight: 300;
+      line-height: 1;
+      color: var(--text);
+      letter-spacing: -.02em;
+      min-height: 1.1em;
+    }
+
+    .unit-label {
+      margin-top: 8px;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Keyframes ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .timer-grid { grid-template-columns: repeat(2, 1fr); }
+      .names { gap: 12px; }
+      .total-strip { flex-direction: column; align-items: flex-start; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="page">
+
+    <!-- Header -->
+    <header>
+      <p class="eyebrow">с того самого момента</p>
+      <div class="names">
+        <span>Ivan</span>
+        <span class="amp">&</span>
+        <span>Yana</span>
+      </div>
+      <div class="since">
+        <!-- calendar icon -->
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="3"/>
+          <path d="M16 2v4M8 2v4M3 10h18"/>
+        </svg>
+        знакомы с 13 апреля 2026, 11:39
+      </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <!-- Timer grid -->
+    <div class="timer-grid">
+
+      <div class="unit-card">
+        <div class="unit-icon">
+          <!-- moon/month icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
+          </svg>
+        </div>
+        <div class="unit-value" id="months">0</div>
+        <div class="unit-label">месяцев</div>
+      </div>
+
+      <div class="unit-card">
+        <div class="unit-icon">
+          <!-- sun/days icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </div>
+        <div class="unit-value" id="days">0</div>
+        <div class="unit-label">дней</div>
+      </div>
+
+      <div class="unit-card">
+        <div class="unit-icon">
+          <!-- clock icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 3"/>
+          </svg>
+        </div>
+        <div class="unit-value" id="hours">0</div>
+        <div class="unit-label">часов</div>
+      </div>
+
+      <div class="unit-card">
+        <div class="unit-icon">
+          <!-- timer/minutes icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v1M12 21v1M4.22 4.22l.7.7M19.08 19.08l.7.7M2 12h1M21 12h1M4.92 19.08l-.7.7M19.78 4.22l-.7.7"/>
+            <circle cx="12" cy="12" r="6"/>
+            <path d="M12 9v3l2 2"/>
+          </svg>
+        </div>
+        <div class="unit-value" id="minutes">0</div>
+        <div class="unit-label">минут</div>
+      </div>
+
+    </div>
+
+    <!-- Seconds row -->
+    <div class="timer-grid" style="grid-template-columns: repeat(2, 1fr);">
+
+      <div class="unit-card">
+        <div class="unit-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 2h14M5 22h14"/>
+            <path d="M5 2c0 6 7 8 7 12S5 22 5 22"/>
+            <path d="M19 2c0 6-7 8-7 12s7 8 7 8"/>
+          </svg>
+        </div>
+        <div class="unit-value" id="secs-display">0</div>
+        <div class="unit-label">секунд</div>
+      </div>
+
+      <div class="unit-card">
+        <div class="unit-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="unit-value" id="seconds" style="font-size: clamp(26px, 3.5vw, 46px);">0</div>
+        <div class="unit-label">всего секунд вместе</div>
+      </div>
+
+    </div>
+
+
+
+  </div>
+
+  <script>
+    const START = new Date('2026-04-13T11:39:00');
+
+    function pad(n) { return String(Math.floor(n)).padStart(2, '0'); }
+
+    function fmt(n) {
+      return Math.floor(n).toLocaleString('ru-RU');
+    }
+
+    function update() {
+      const now  = new Date();
+      const diff = now - START; // ms
+
+      const totalSec   = diff / 1000;
+      const totalMin   = totalSec / 60;
+      const totalHours = totalMin / 60;
+      const totalDays  = totalHours / 24;
+
+      // Months: calendar-accurate
+      let months = (now.getFullYear() - START.getFullYear()) * 12 + (now.getMonth() - START.getMonth());
+      // Adjust if day hasn't been reached yet
+      const tempDate = new Date(START);
+      tempDate.setMonth(tempDate.getMonth() + months);
+      if (tempDate > now) months--;
+
+      const afterMonths = new Date(START);
+      afterMonths.setMonth(afterMonths.getMonth() + Math.max(months, 0));
+
+      const remainMs   = now - afterMonths;
+      const remainSec  = remainMs / 1000;
+      const remainMin  = remainSec / 60;
+      const remainHour = remainMin / 60;
+      const remainDay  = Math.floor(remainHour / 24);
+      const rH         = Math.floor(remainHour % 24);
+      const rM         = Math.floor(remainMin  % 60);
+
+      const rS = Math.floor(remainSec % 60);
+
+      document.getElementById('months').textContent      = Math.max(months, 0);
+      document.getElementById('days').textContent        = remainDay;
+      document.getElementById('hours').textContent       = rH;
+      document.getElementById('minutes').textContent     = pad(rM);
+      document.getElementById('secs-display').textContent = pad(rS);
+      document.getElementById('seconds').textContent     = fmt(totalSec);
+    }
+
+    update();
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>
